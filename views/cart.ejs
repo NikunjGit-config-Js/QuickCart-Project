@@ -1,0 +1,89 @@
+<%- include('./partials/header') %>
+<div class="w-full h-screen flex items-start px-20 py-20 gap-10">
+    <div class="w-[20%] flex flex-col items-start pr-8 border-r">
+        <a href="/shop" class="mb-4 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 w-full text-left">Home</a>
+        <a href="/cart" class="mb-4 px-4 py-2 rounded bg-blue-200 hover:bg-blue-300 w-full text-left">Cart</a>
+        <a href="/users/logout" class="mb-4 px-4 py-2 rounded bg-red-200 hover:bg-red-300 w-full text-left">Logout</a>
+    </div>
+    <div class="w-[80%] flex gap-10">
+        <div class="w-[60%]">
+            <h3 class="text-xl mb-4">All Products</h3>
+            <div class="flex flex-wrap gap-6">
+                <% products.forEach(function(product){ %>
+                    <div class="w-60 border rounded-md p-2 flex flex-col items-center">
+                        <div class="w-full h-40 flex items-center justify-center bg-[<%= product.bgcolor %>]">
+                            <img class="h-[8rem]" src="data:image/jpeg;base64,<%= product.image.toString('base64') %>" alt="">
+                        </div>
+                        <div class="flex flex-col items-center mt-2">
+                            <h3 class="font-bold"><%= product.name %></h3>
+                            <h4>₹ <%= product.price %></h4>
+                            <% if(product.discount && product.discount > 0){ %>
+                                <div class="text-green-600 text-sm">Discount: ₹ <%= product.discount %></div>
+                            <% } %>
+                            <form class="add-to-cart-form" data-id="<%= product._id %>">
+                                <button type="submit" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded">Add to Cart</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+        <div class="w-[40%] rounded-md overflow-hidden bg-white p-4">
+            <h3 class="text-xl mb-2">Your Cart</h3>
+            <% if(user && user.cart.length > 0){ %>
+                <% user.cart.forEach(function(item){ %>
+                    <div class="flex justify-between items-center mb-2">
+                        <span><%= item.product.name %> (x<%= item.quantity %>)</span>
+                        <span>
+                            ₹ <%= item.product.price %> x <%= item.quantity %>
+                            <% if(item.product.discount && item.product.discount > 0){ %>
+                                <span class="text-green-600 text-xs">(-₹<%= item.product.discount * item.quantity %>)</span>
+                            <% } %>
+                        </span>
+                        <form class="remove-from-cart-form" data-id="<%= item.product._id %>">
+                            <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded">Remove</button>
+                        </form>
+                    </div>
+                <% }) %>
+                <hr class="my-2">
+                <div class="mb-2">
+                    <div>Total: <span class="font-bold">₹ <%= total %></span></div>
+                    <div>Discount: <span class="font-bold text-green-600">-₹ <%= totalDiscount %></span></div>
+                    <div>Final Total: <span class="font-bold text-blue-600">₹ <%= finalTotal %></span></div>
+                </div>
+                <a href="/cart/checkout" class="block w-full mt-4 py-2 text-center bg-green-500 text-white rounded">Proceed to Checkout</a>
+            <% } else { %>
+                <div>Your cart is empty.</div>
+            <% } %>
+        </div>
+    </div>
+</div>
+<script>
+// Add to cart
+Array.from(document.querySelectorAll('.add-to-cart-form')).forEach(form => {
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const productId = this.getAttribute('data-id');
+        await fetch('/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId })
+        });
+        location.reload();
+    });
+});
+// Remove from cart
+Array.from(document.querySelectorAll('.remove-from-cart-form')).forEach(form => {
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const productId = this.getAttribute('data-id');
+        await fetch('/cart/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId })
+        });
+        location.reload();
+    });
+});
+</script>
+<%- include('./partials/footer') %>

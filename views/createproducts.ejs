@@ -1,0 +1,77 @@
+<%- include('./partials/header') %>
+
+<% if(success && success.length>0){ %>
+    <div class="absolute top-5 left-1/2 -translate-x-1/2 -translate-y-1/2 p-3 rounded-md bg-blue-500">
+        <span class="inline-block mt-1 mb-1 text-white">
+            <%= success %>
+        </span>
+    </div>
+<% } %>
+
+<div class="min-h-screen flex flex-col">
+    <div class="container px-10 py-20 flex flex-grow">
+        <div class="w-[25%] flex h-screen flex-col items-start">
+            <div class="flex flex-col">
+                <a class="block w-fit mb-2" href="/admin">All Products</a>
+                <a class="block w-fit mb-2" href="/products/create">Create new product</a>
+            </div>
+        </div>
+        <main class="w-3/4 bg-white p-8 shadow ml-4">
+            <h2 class="text-xl font-bold mb-4">Create New Product</h2>
+            <form id="productForm" autocomplete="off" action="/products/create" method="post" enctype="multipart/form-data">
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-2">Product Details</h3>
+                    <div class="mb-4">
+                        <label class="block mb-2 font-medium">Product Image</label>
+                        <input name="image" type="file" class="py-2 px-4 rounded" value="Select File">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input name="name" type="text" placeholder="Product Name" class="border p-2 rounded w-full" value="<%= typeof formData !== 'undefined' ? formData.name : '' %>">
+                        <input name="price" type="text" placeholder="Product Price" class="border p-2 rounded w-full" value="<%= typeof formData !== 'undefined' ? formData.price : '' %>">
+                        <input name="discount" type="text" placeholder="Discount Price" class="border p-2 rounded w-full" value="<%= typeof formData !== 'undefined' ? formData.discount : '' %>">
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Panel Details</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input name="bgcolor" type="text" placeholder="Background Color" class="border p-2 rounded w-full" value="<%= typeof formData !== 'undefined' ? formData.bgcolor : '' %>">
+                        <input name="panelcolor" type="text" placeholder="Panel Color" class="border p-2 rounded w-full" value="<%= typeof formData !== 'undefined' ? formData.panelcolor : '' %>">
+                        <input name="textcolor" type="text" placeholder="Text Color" class="border p-2 rounded w-full" value="<%= typeof formData !== 'undefined' ? formData.textcolor : '' %>">
+                    </div>
+                </div>
+                <div class="mt-6 flex gap-4">
+                    <button type="submit" class="px-5 rounded-full py-3 bg-blue-500 text-white">Create Product</button>
+                    <a href="/admin" class="px-5 rounded-full py-3 bg-gray-300 text-black" id="gotoAllProducts">Go to All Products</a>
+                </div>
+                <div class="mt-4 text-sm text-gray-500" id="autosave-status"></div>
+            </form>
+        </main>
+    </div>
+</div>
+<script>
+// Auto-save form data to localStorage on input
+const form = document.getElementById('productForm');
+const fields = ['name', 'price', 'discount', 'bgcolor', 'panelcolor', 'textcolor'];
+const status = document.getElementById('autosave-status');
+let autosaveTimeout;
+fields.forEach(field => {
+    const input = form.elements[field];
+    if(input) {
+        input.value = localStorage.getItem('product_' + field) || input.value;
+        input.addEventListener('input', function() {
+            localStorage.setItem('product_' + field, this.value);
+            clearTimeout(autosaveTimeout);
+            status.textContent = 'Saving...';
+            autosaveTimeout = setTimeout(() => {
+                status.textContent = 'All changes saved.';
+            }, 500);
+        });
+    }
+});
+// Clear form data from localStorage on submit
+form.addEventListener('submit', function() {
+    fields.forEach(field => localStorage.removeItem('product_' + field));
+    status.textContent = '';
+});
+</script>
+<%- include('./partials/footer') %>

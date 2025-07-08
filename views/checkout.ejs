@@ -1,0 +1,42 @@
+<%- include('./partials/header') %>
+<div class="w-full h-screen flex items-center justify-center">
+  <div class="bg-white p-10 rounded shadow w-[30rem]">
+    <h2 class="text-2xl font-bold mb-4">Order Summary</h2>
+    <% if(orderPlaced){ %>
+      <div class="mb-4 p-3 bg-green-100 text-green-700 rounded">Your order has been placed successfully!</div>
+      <a href="/cart" class="block w-full py-2 mt-4 text-center bg-blue-500 text-white rounded">Back to Shop</a>
+    <% } else if(user && user.cart.length > 0){ %>
+      <ul class="mb-4">
+        <% user.cart.forEach(function(item){ %>
+          <li class="flex justify-between mb-2">
+            <span><%= item.product.name %> (x<%= item.quantity %>)</span>
+            <span>
+              ₹ <%= item.product.price %> x <%= item.quantity %>
+              <% if(item.product.discount && item.product.discount > 0){ %>
+                <span class="text-green-600 text-xs">(-₹<%= item.product.discount * item.quantity %>)</span>
+              <% } %>
+            </span>
+          </li>
+        <% }) %>
+      </ul>
+      <div class="flex justify-between font-bold text-lg mb-1">
+        <span>Total:</span>
+        <span>₹ <%= total %></span>
+      </div>
+      <div class="flex justify-between font-bold text-md mb-1">
+        <span>Discount:</span>
+        <span class="text-green-600">-₹ <%= totalDiscount %></span>
+      </div>
+      <div class="flex justify-between font-bold text-lg mb-4">
+        <span>Final Total:</span>
+        <span class="text-blue-600">₹ <%= finalTotal %></span>
+      </div>
+      <form action="/cart/checkout" method="post">
+        <button type="submit" class="w-full py-2 bg-green-500 text-white rounded">Place Order</button>
+      </form>
+    <% } else { %>
+      <div>Your cart is empty.</div>
+    <% } %>
+  </div>
+</div>
+<%- include('./partials/footer') %>
